@@ -44,11 +44,17 @@ func (r *AuthController) Register(ctx http.Context) {
 		return
 	}
 
-	if err := facades.Orm.Query().Create(&models.User{
-		Name:     user.Name,
-		Email:    user.Email,
-		Password: user.Password,
-	}); err != nil {
+	// hash users password
+	hashedPassword, err := facades.Hash.Make(user.Password)
+	if err != nil {
+		ctx.Response().Json(http.StatusInternalServerError, http.Json{
+			"message": err.Error(),
+		})
+		return
+	}
+	user.Password = hashedPassword
+
+	if err := facades.Orm.Query().Create(&user); err != nil {
 		//@todo: implement proper error handler to hide db errors
 		ctx.Response().Json(http.StatusInternalServerError, http.Json{
 			"error": err.Error(),
@@ -56,9 +62,18 @@ func (r *AuthController) Register(ctx http.Context) {
 		return
 	}
 
+	token, err := facades.Auth.LoginUsingID(ctx, user.ID)
+	if err != nil {
+		ctx.Response().Json(http.StatusInternalServerError, http.Json{
+			"message": err.Error(),
+		})
+		return
+	}
+
 	//@todo: implement proper DTO approach to transform models into JSON reponse
 	ctx.Response().Success().Json(http.Json{
-		"ID":   user.ID,
-		"name": user.Name,
+		"ID":    user.ID,
+		"name":  user.Name,
+		"token": token,
 	})
 }

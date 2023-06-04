@@ -1,5 +1,5 @@
 CREATE TABLE users (
-  id BINARY(40),
+  id BINARY(36),
   name varchar(200) DEFAULT '' NOT NULL,
   email varchar(200) DEFAULT '' NOT NULL,
   password varchar(200) DEFAULT '' NOT NULL,
