@@ -10,10 +10,11 @@ import (
 func Web() {
 	facades.Route.Get("/", func(ctx http.Context) {
 		ctx.Response().Json(http.StatusOK, http.Json{
-			"Hello": "Goravel",
+			"Welcome to": facades.Config.Env("APP_NAME"),
 		})
 	})
 
 	authController := controllers.NewAuthController()
 	facades.Route.Post("/auth/register", authController.Register)
+	facades.Route.Post("/auth/login", authController.Login)
 }
