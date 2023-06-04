@@ -14,6 +14,6 @@ func Web() {
 		})
 	})
 
-	userController := controllers.NewUserController()
-	facades.Route.Get("/users/{id}", userController.Show)
+	authController := controllers.NewAuthController()
+	facades.Route.Post("/auth/register", authController.Register)
 }
