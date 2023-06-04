@@ -17,6 +17,8 @@ func NewAuthController() *AuthController {
 	}
 }
 
+// POST /auth/register
+// Registers a new user
 func (r *AuthController) Register(ctx http.Context) {
 	validator, err := ctx.Request().Validate(map[string]string{
 		"name":     "required",
@@ -78,6 +80,8 @@ func (r *AuthController) Register(ctx http.Context) {
 	})
 }
 
+// POST /auth/login
+// Check user creds and return jwt
 func (r *AuthController) Login(ctx http.Context) {
 	validator, err := ctx.Request().Validate(map[string]string{
 		"email":    "required|email",
@@ -127,5 +131,16 @@ func (r *AuthController) Login(ctx http.Context) {
 		"ID":    user.ID,
 		"name":  user.Name,
 		"token": token,
+	})
+}
+
+// GET auth/me
+// returns current user by processing the Bearer token with Jwt middleware
+func (r *AuthController) Me(ctx http.Context) {
+	user := ctx.Value("user").(models.User)
+	//@todo: implement proper DTO approach to transform models into JSON reponse
+	ctx.Response().Success().Json(http.Json{
+		"ID":   user.ID,
+		"name": user.Name,
 	})
 }
