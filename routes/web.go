@@ -17,6 +17,7 @@ func Web() {
 	})
 
 	authController := controllers.NewAuthController()
+	todosController := controllers.NewTodosController()
 
 	// Public endpoints
 	facades.Route.Post("/auth/register", authController.Register)
@@ -25,5 +26,6 @@ func Web() {
 	// Secuged endpoints
 	facades.Route.Middleware(middleware.Jwt()).Group(func(route route.Route) {
 		route.Get("/auth/me", authController.Me)
+		route.Resource("todos", todosController)
 	})
 }

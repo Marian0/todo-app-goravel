@@ -25,7 +25,11 @@ func (receiver *NotExists) Passes(_ validation.Data, val any, options ...any) bo
 
 	tableName := options[0].(string)
 	fieldName := options[1].(string)
-	requestValue := val.(string)
+	requestValue, ok := val.(string)
+	// check if requestValue could be transform into a string
+	if !ok {
+		return true
+	}
 
 	if len(requestValue) == 0 {
 		return false
