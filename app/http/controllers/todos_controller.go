@@ -1,8 +1,11 @@
 package controllers
 
 import (
+	"goravel/app/helpers"
 	"goravel/app/http/dtos"
+	"goravel/app/http/requests"
 	"goravel/app/models"
+	"log"
 
 	"github.com/goravel/framework/contracts/http"
 	"github.com/goravel/framework/facades"
@@ -32,7 +35,7 @@ func (c *TodosController) Index(ctx http.Context) {
 		})
 		return
 	}
-	ctx.Response().Success().Json(dtos.TodoToTodoDTO(todos))
+	ctx.Response().Success().Json(dtos.TodoArrayToDTO(todos))
 }
 
 // GET /todos/{id}
@@ -88,9 +91,53 @@ func (c *TodosController) Store(ctx http.Context) {
 
 // PUT /todos/{id}
 func (c *TodosController) Update(ctx http.Context) {
-	ctx.Response().Success().Json(http.Json{
-		"feature": "coming soon...",
-	})
+	todoID := ctx.Request().Input("id")
+	//@todo: check it's a valid uuid
+
+	// Get entity
+	var todo models.Todo
+	err := facades.Orm.Query().Where("id = ?", todoID).FindOrFail(&todo)
+	if err != nil {
+		helpers.RespondError(ctx, http.StatusNotFound, "Todo doesnt exist")
+		return
+	}
+
+	// Policy check
+	if !facades.Gate.WithContext(ctx).Allows("update-todo", map[string]any{
+		"todo": todo,
+	}) {
+		helpers.RespondError(ctx, http.StatusForbidden, "Todo forbidden access")
+		return
+	}
+
+	// Request validation
+	var updateTodoRequest requests.UpdatedTodoRequest
+	errors, err := ctx.Request().ValidateRequest(&updateTodoRequest)
+
+	// Server errors
+	if err != nil {
+		log.Println(err.Error())
+		helpers.RespondError(ctx, http.StatusInternalServerError, "validation error")
+		return
+	}
+
+	// Request errors
+	if errors != nil {
+		helpers.RespondError(ctx, http.StatusUnprocessableEntity, errors.All())
+		return
+	}
+
+	//update model
+	todo.Title = updateTodoRequest.Title
+	err = facades.Orm.Query().Save(&todo)
+
+	if err != nil {
+		log.Println(err.Error())
+		helpers.RespondError(ctx, http.StatusInternalServerError, "saving error")
+		return
+	}
+
+	helpers.RespondSuccess(ctx, http.StatusOK, dtos.TodoToDTO(todo))
 }
 
 // DELETE /todos/{id}
