@@ -30,12 +30,11 @@ func (c *TodosController) Index(ctx http.Context) {
 	err := facades.Orm.Query().Where("user_id = ?", user.ID).Find(&todos)
 
 	if err != nil {
-		ctx.Response().Json(http.StatusInternalServerError, http.Json{
-			"error": err.Error(),
-		})
+		helpers.RespondError(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
-	ctx.Response().Success().Json(dtos.TodoArrayToDTO(todos))
+
+	helpers.RespondSuccess(ctx, http.StatusAccepted, dtos.TodoArrayToDTO(todos))
 }
 
 // GET /todos/{id}
@@ -55,48 +54,43 @@ func (c *TodosController) Store(ctx http.Context) {
 		"title": "required|max_len:200",
 	})
 	if err != nil {
-		ctx.Response().Json(http.StatusBadRequest, http.Json{
-			"message": err.Error(),
-		})
+		helpers.RespondError(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
+
 	if validator.Fails() {
-		ctx.Response().Json(http.StatusBadRequest, http.Json{
-			"message": validator.Errors().All(),
-		})
+		helpers.RespondError(ctx, http.StatusUnprocessableEntity, validator.Errors().All())
 		return
 	}
 
 	var todo models.Todo
 	if err := validator.Bind(&todo); err != nil {
-		ctx.Response().Json(http.StatusBadRequest, http.Json{
-			"message": err.Error(),
-		})
+		helpers.RespondError(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 	todo.UserID = user.ID
 
 	if err := facades.Orm.Query().Create(&todo); err != nil {
-		//@todo: implement proper error handler to hide db errors
-		ctx.Response().Json(http.StatusInternalServerError, http.Json{
-			"error": err.Error(),
-		})
+		helpers.RespondError(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	ctx.Response().Success().Json(http.Json{
-		"ID": todo.ID,
-	})
+	helpers.RespondSuccess(ctx, http.StatusCreated, dtos.TodoToDTO(todo))
 }
 
 // PUT /todos/{id}
 func (c *TodosController) Update(ctx http.Context) {
-	todoID := ctx.Request().Input("id")
-	//@todo: check it's a valid uuid
+	// Validate querystring
+	todoID, err := helpers.ValidateUUID(ctx.Request().Input("id"))
+
+	if err != nil {
+		helpers.RespondError(ctx, http.StatusUnprocessableEntity, err.Error())
+		return
+	}
 
 	// Get entity
 	var todo models.Todo
-	err := facades.Orm.Query().Where("id = ?", todoID).FindOrFail(&todo)
+	err = facades.Orm.Query().Where("id = ?", todoID).FindOrFail(&todo)
 	if err != nil {
 		helpers.RespondError(ctx, http.StatusNotFound, "Todo doesnt exist")
 		return
@@ -142,7 +136,36 @@ func (c *TodosController) Update(ctx http.Context) {
 
 // DELETE /todos/{id}
 func (c *TodosController) Destroy(ctx http.Context) {
-	ctx.Response().Success().Json(http.Json{
-		"feature": "coming soon...",
-	})
+	// Validate querystring
+	todoID, err := helpers.ValidateUUID(ctx.Request().Input("id"))
+
+	if err != nil {
+		helpers.RespondError(ctx, http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+
+	// Get entity
+	var todo models.Todo
+	err = facades.Orm.Query().Where("id = ?", todoID).FindOrFail(&todo)
+	if err != nil {
+		helpers.RespondError(ctx, http.StatusNotFound, "Todo doesnt exist")
+		return
+	}
+
+	// Policy check
+	if !facades.Gate.WithContext(ctx).Allows("destroy-todo", map[string]any{
+		"todo": todo,
+	}) {
+		helpers.RespondError(ctx, http.StatusForbidden, "Todo forbidden access")
+		return
+	}
+
+	_, err = facades.Orm.Query().Delete(&todo)
+
+	if err != nil {
+		helpers.RespondError(ctx, http.StatusInternalServerError, "delete error")
+		return
+	}
+
+	helpers.RespondSuccess(ctx, http.StatusOK, nil)
 }

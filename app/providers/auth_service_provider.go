@@ -17,5 +17,6 @@ func (receiver *AuthServiceProvider) Boot() {
 
 	// Polcies definitions
 	facades.Gate.Define("update-todo", policies.NewTodoPolicy().Update)
+	facades.Gate.Define("destroy-todo", policies.NewTodoPolicy().Destroy)
 
 }

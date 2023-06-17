@@ -26,3 +26,16 @@ func (r *TodoPolicy) Update(ctx context.Context, arguments map[string]any) acces
 		return access.NewDenyResponse("You do not own this todo")
 	}
 }
+
+func (r *TodoPolicy) Destroy(ctx context.Context, arguments map[string]any) access.Response {
+	user := ctx.Value("user").(models.User)
+	todo := arguments["todo"].(models.Todo)
+
+	//@todo: check panics while object casting
+
+	if user.ID == todo.UserID {
+		return access.NewAllowResponse()
+	} else {
+		return access.NewDenyResponse("You do not own this todo")
+	}
+}
