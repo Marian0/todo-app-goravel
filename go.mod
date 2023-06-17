@@ -3,11 +3,12 @@ module goravel
 go 1.18
 
 require (
-	github.com/google/uuid v1.3.0
 	github.com/goravel/framework v1.11.3
 	google.golang.org/grpc v1.50.1
-	gorm.io/gorm v1.24.6
 )
+
+// Uncomment this line to load local framework (it should has the same branch/tag)
+// replace github.com/goravel/framework => ../goravel-framework
 
 require (
 	cloud.google.com/go v0.105.0 // indirect
@@ -78,6 +79,7 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
 	github.com/gookit/color v1.5.2 // indirect
@@ -177,6 +179,7 @@ require (
 	gorm.io/driver/mysql v1.4.5 // indirect
 	gorm.io/driver/postgres v1.4.6 // indirect
 	gorm.io/driver/sqlserver v1.4.2 // indirect
+	gorm.io/gorm v1.24.6
 	gorm.io/plugin/dbresolver v1.4.1 // indirect
 	modernc.org/libc v1.22.3 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
