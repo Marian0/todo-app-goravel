@@ -22,7 +22,7 @@ func TodoToDTO(todo models.Todo) TodoDTO {
 		Title:       todo.Title,
 		UserID:      todo.UserID,
 		CompletedAt: helpers.FormatNullTimeToISO(todo.CompletedAt),
-		CreatedAt:   helpers.FormatTimeToISO(todo.CreatedAt),
+		CreatedAt:   todo.CreatedAt.ToIso8601String(),
 	}
 }
 

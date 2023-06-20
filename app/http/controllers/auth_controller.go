@@ -47,7 +47,7 @@ func (r *AuthController) Register(ctx http.Context) {
 	}
 
 	// hash users password
-	hashedPassword, err := facades.Hash.Make(user.Password)
+	hashedPassword, err := facades.Hash().Make(user.Password)
 	if err != nil {
 		ctx.Response().Json(http.StatusInternalServerError, http.Json{
 			"message": err.Error(),
@@ -56,7 +56,7 @@ func (r *AuthController) Register(ctx http.Context) {
 	}
 	user.Password = hashedPassword
 
-	if err := facades.Orm.Query().Create(&user); err != nil {
+	if err := facades.Orm().Query().Create(&user); err != nil {
 		//@todo: implement proper error handler to hide db errors
 		ctx.Response().Json(http.StatusInternalServerError, http.Json{
 			"error": err.Error(),
@@ -64,7 +64,7 @@ func (r *AuthController) Register(ctx http.Context) {
 		return
 	}
 
-	token, err := facades.Auth.LoginUsingID(ctx, user.ID)
+	token, err := facades.Auth().LoginUsingID(ctx, user.ID)
 	if err != nil {
 		ctx.Response().Json(http.StatusInternalServerError, http.Json{
 			"message": err.Error(),
@@ -102,7 +102,7 @@ func (r *AuthController) Login(ctx http.Context) {
 
 	// Look for user
 	var user models.User
-	err = facades.Orm.Query().Where("email = ?", ctx.Request().Input("email")).FindOrFail(&user)
+	err = facades.Orm().Query().Where("email = ?", ctx.Request().Input("email")).FindOrFail(&user)
 	if err != nil {
 		ctx.Response().Json(http.StatusBadRequest, http.Json{
 			"error": "Wrong username or password",
@@ -111,14 +111,14 @@ func (r *AuthController) Login(ctx http.Context) {
 	}
 
 	//password check
-	if !facades.Hash.Check(ctx.Request().Input("password"), user.Password) {
+	if !facades.Hash().Check(ctx.Request().Input("password"), user.Password) {
 		ctx.Response().Json(http.StatusBadRequest, http.Json{
 			"error": "Wrong username or password",
 		})
 		return
 	}
 
-	token, err := facades.Auth.LoginUsingID(ctx, user.ID)
+	token, err := facades.Auth().LoginUsingID(ctx, user.ID)
 	if err != nil {
 		ctx.Response().Json(http.StatusInternalServerError, http.Json{
 			"message": err.Error(),

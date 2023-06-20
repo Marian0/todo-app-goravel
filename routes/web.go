@@ -10,9 +10,9 @@ import (
 )
 
 func Web() {
-	facades.Route.Get("/", func(ctx http.Context) {
+	facades.Route().Get("/", func(ctx http.Context) {
 		ctx.Response().Json(http.StatusOK, http.Json{
-			"Welcome to": facades.Config.Env("APP_NAME"),
+			"Welcome to": facades.Config().Env("APP_NAME"),
 		})
 	})
 
@@ -20,11 +20,11 @@ func Web() {
 	todosController := controllers.NewTodosController()
 
 	// Public endpoints
-	facades.Route.Post("/auth/register", authController.Register)
-	facades.Route.Post("/auth/login", authController.Login)
+	facades.Route().Post("/auth/register", authController.Register)
+	facades.Route().Post("/auth/login", authController.Login)
 
 	// Secuged endpoints
-	facades.Route.Middleware(middleware.Jwt()).Group(func(route route.Route) {
+	facades.Route().Middleware(middleware.Jwt()).Group(func(route route.Route) {
 		route.Get("/auth/me", authController.Me)
 		route.Resource("todos", todosController)
 	})

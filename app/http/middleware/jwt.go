@@ -18,9 +18,9 @@ func Jwt() contractshttp.Middleware {
 			return
 		}
 
-		if _, err := facades.Auth.Parse(ctx, token); err != nil {
+		if _, err := facades.Auth().Parse(ctx, token); err != nil {
 			if errors.Is(err, auth.ErrorTokenExpired) {
-				token, err = facades.Auth.Refresh(ctx)
+				token, err = facades.Auth().Refresh(ctx)
 				if err != nil {
 					// Refresh time exceeded
 					ctx.Request().AbortWithStatus(http.StatusUnauthorized)
@@ -36,7 +36,7 @@ func Jwt() contractshttp.Middleware {
 
 		// Query DB and validates USER to be injected into the context
 		var user models.User
-		if err := facades.Auth.User(ctx, &user); err != nil {
+		if err := facades.Auth().User(ctx, &user); err != nil {
 			ctx.Request().AbortWithStatus(http.StatusUnauthorized)
 			return
 		}

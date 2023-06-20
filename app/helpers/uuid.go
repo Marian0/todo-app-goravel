@@ -14,7 +14,7 @@ func ValidateUUID(value any) (*string, error) {
 	}
 
 	// use validator to check uuid
-	validator, err := facades.Validation.Make(map[string]any{
+	validator, err := facades.Validation().Make(map[string]any{
 		"uuid": uuid,
 	}, map[string]string{
 		"uuid": "required|uuid",

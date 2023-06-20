@@ -27,7 +27,7 @@ func (c *TodosController) Index(ctx http.Context) {
 	user := ctx.Value("user").(models.User)
 
 	var todos []models.Todo
-	err := facades.Orm.Query().Where("user_id = ?", user.ID).Find(&todos)
+	err := facades.Orm().Query().Where("user_id = ?", user.ID).Find(&todos)
 
 	if err != nil {
 		helpers.RespondError(ctx, http.StatusInternalServerError, err.Error())
@@ -70,7 +70,7 @@ func (c *TodosController) Store(ctx http.Context) {
 	}
 	todo.UserID = user.ID
 
-	if err := facades.Orm.Query().Create(&todo); err != nil {
+	if err := facades.Orm().Query().Create(&todo); err != nil {
 		helpers.RespondError(ctx, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -90,14 +90,14 @@ func (c *TodosController) Update(ctx http.Context) {
 
 	// Get entity
 	var todo models.Todo
-	err = facades.Orm.Query().Where("id = ?", todoID).FindOrFail(&todo)
+	err = facades.Orm().Query().Where("id = ?", todoID).FindOrFail(&todo)
 	if err != nil {
 		helpers.RespondError(ctx, http.StatusNotFound, "Todo doesnt exist")
 		return
 	}
 
 	// Policy check
-	if !facades.Gate.WithContext(ctx).Allows("update-todo", map[string]any{
+	if !facades.Gate().WithContext(ctx).Allows("update-todo", map[string]any{
 		"todo": todo,
 	}) {
 		helpers.RespondError(ctx, http.StatusForbidden, "Todo forbidden access")
@@ -123,7 +123,7 @@ func (c *TodosController) Update(ctx http.Context) {
 
 	//update model
 	todo.Title = updateTodoRequest.Title
-	err = facades.Orm.Query().Save(&todo)
+	err = facades.Orm().Query().Save(&todo)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -146,21 +146,21 @@ func (c *TodosController) Destroy(ctx http.Context) {
 
 	// Get entity
 	var todo models.Todo
-	err = facades.Orm.Query().Where("id = ?", todoID).FindOrFail(&todo)
+	err = facades.Orm().Query().Where("id = ?", todoID).FindOrFail(&todo)
 	if err != nil {
 		helpers.RespondError(ctx, http.StatusNotFound, "Todo doesnt exist")
 		return
 	}
 
 	// Policy check
-	if !facades.Gate.WithContext(ctx).Allows("destroy-todo", map[string]any{
+	if !facades.Gate().WithContext(ctx).Allows("destroy-todo", map[string]any{
 		"todo": todo,
 	}) {
 		helpers.RespondError(ctx, http.StatusForbidden, "Todo forbidden access")
 		return
 	}
 
-	_, err = facades.Orm.Query().Delete(&todo)
+	_, err = facades.Orm().Query().Delete(&todo)
 
 	if err != nil {
 		helpers.RespondError(ctx, http.StatusInternalServerError, "delete error")
