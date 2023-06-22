@@ -1,4 +1,6 @@
-# Goravel Sample Project
+# Todo List Goravel Sample Project
+
+- https://www.goravel.dev/
 
 ## Requeriments
 - Mysql DB
