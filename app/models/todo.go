@@ -1,10 +1,9 @@
 package models
 
 import (
-	"database/sql"
-
 	"github.com/google/uuid"
 	"github.com/goravel/framework/database/orm"
+	"github.com/goravel/framework/support/carbon"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +11,7 @@ type Todo struct {
 	ID uuid.UUID
 
 	Title       string
-	CompletedAt sql.NullTime
+	CompletedAt *carbon.Carbon
 	UserID      uuid.UUID
 
 	orm.Timestamps

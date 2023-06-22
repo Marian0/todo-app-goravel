@@ -1,7 +1,6 @@
 package dtos
 
 import (
-	"goravel/app/helpers"
 	"goravel/app/models"
 
 	"github.com/google/uuid"
@@ -17,12 +16,17 @@ type TodoDTO struct {
 }
 
 func TodoToDTO(todo models.Todo) TodoDTO {
+	completedAt := ""
+	if todo.CompletedAt != nil {
+		completedAt = todo.CompletedAt.ToString()
+	}
+
 	return TodoDTO{
 		ID:          todo.ID,
 		Title:       todo.Title,
 		UserID:      todo.UserID,
-		CompletedAt: helpers.FormatNullTimeToISO(todo.CompletedAt),
-		CreatedAt:   todo.CreatedAt.ToIso8601String(),
+		CompletedAt: completedAt,
+		CreatedAt:   todo.CreatedAt.ToString(),
 	}
 }
 

@@ -3,7 +3,7 @@ package controllers
 import (
 	"goravel/app/helpers"
 	"goravel/app/http/dtos"
-	"goravel/app/http/requests"
+	"goravel/app/http/requests/todo_requests"
 	"goravel/app/models"
 	"log"
 
@@ -105,7 +105,7 @@ func (c *TodosController) Update(ctx http.Context) {
 	}
 
 	// Request validation
-	var updateTodoRequest requests.UpdatedTodoRequest
+	var updateTodoRequest todo_requests.UpdatedTodoRequest
 	errors, err := ctx.Request().ValidateRequest(&updateTodoRequest)
 
 	// Server errors
