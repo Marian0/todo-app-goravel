@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"goravel/app/helpers"
 	"goravel/app/models"
 	"net/http"
 
@@ -14,7 +15,7 @@ func Jwt() contractshttp.Middleware {
 	return func(ctx contractshttp.Context) {
 		token := ctx.Request().Header("Authorization", "")
 		if token == "" {
-			ctx.Request().AbortWithStatus(http.StatusUnauthorized)
+			ctx.Request().AbortWithStatusJson(http.StatusUnauthorized, helpers.GetJSONErrorBody("unauthorized"))
 			return
 		}
 
@@ -23,13 +24,13 @@ func Jwt() contractshttp.Middleware {
 				token, err = facades.Auth().Refresh(ctx)
 				if err != nil {
 					// Refresh time exceeded
-					ctx.Request().AbortWithStatus(http.StatusUnauthorized)
+					ctx.Request().AbortWithStatusJson(http.StatusUnauthorized, helpers.GetJSONErrorBody("unauthorized"))
 					return
 				}
 
 				token = "Bearer " + token
 			} else {
-				ctx.Request().AbortWithStatus(http.StatusUnauthorized)
+				ctx.Request().AbortWithStatusJson(http.StatusUnauthorized, helpers.GetJSONErrorBody("unauthorized"))
 				return
 			}
 		}
@@ -37,7 +38,7 @@ func Jwt() contractshttp.Middleware {
 		// Query DB and validates USER to be injected into the context
 		var user models.User
 		if err := facades.Auth().User(ctx, &user); err != nil {
-			ctx.Request().AbortWithStatus(http.StatusUnauthorized)
+			ctx.Request().AbortWithStatusJson(http.StatusUnauthorized, helpers.GetJSONErrorBody("unauthorized"))
 			return
 		}
 		ctx.WithValue("user", user)
