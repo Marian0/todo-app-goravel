@@ -27,7 +27,7 @@ func (c *TodosController) Index(ctx http.Context) {
 	user := ctx.Value("user").(models.User)
 
 	var todos []models.Todo
-	err := facades.Orm().Query().Where("user_id = ?", user.ID).Find(&todos)
+	err := facades.Orm().Query().Where("user_id = ?", user.ID).With("User").Find(&todos)
 
 	if err != nil {
 		helpers.RespondError(ctx, http.StatusInternalServerError, err.Error())
@@ -73,6 +73,12 @@ func (c *TodosController) Store(ctx http.Context) {
 	if err := facades.Orm().Query().Create(&todo); err != nil {
 		helpers.RespondError(ctx, http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	err = facades.Orm().Query().Load(&todo, "User")
+
+	if err != nil {
+		log.Println(err)
 	}
 
 	helpers.RespondSuccess(ctx, http.StatusCreated, dtos.TodoToDTO(todo))

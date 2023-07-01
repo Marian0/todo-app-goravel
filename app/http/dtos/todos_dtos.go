@@ -9,10 +9,11 @@ import (
 type TodoDTO struct {
 	ID uuid.UUID `json:"id"`
 
-	Title       string    `json:"title"`
-	CompletedAt string    `json:"completed_at"`
-	UserID      uuid.UUID `json:"user_id"`
-	CreatedAt   string    `json:"created_at"`
+	Title       string      `json:"title"`
+	CompletedAt string      `json:"completed_at"`
+	CreatedAt   string      `json:"created_at"`
+	UserID      uuid.UUID   `json:"user_id"`
+	User        models.User `json:"user"`
 }
 
 func TodoToDTO(todo models.Todo) TodoDTO {
@@ -27,6 +28,7 @@ func TodoToDTO(todo models.Todo) TodoDTO {
 		UserID:      todo.UserID,
 		CompletedAt: completedAt,
 		CreatedAt:   todo.CreatedAt.ToString(),
+		User:        todo.User,
 	}
 }
 
